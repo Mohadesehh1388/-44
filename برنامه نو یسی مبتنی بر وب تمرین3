@@ -1,0 +1,103 @@
+// Mohadeseh Borandeh
+const express = require('express');
+const app = express();
+app.use(express.json())
+const users = [
+    {
+        username: "admin",
+        password: "1234",
+        email: "test@gmail.com"
+    }
+];
+
+
+app.post("/signup", function(req, res){
+    const userInfo = req.body;
+    if (userInfo.confirmPassword !== userInfo.password){
+        res.status(400).json({
+            status: false,
+            message: "invalid password"
+        })
+        return;
+    }
+
+    if (userInfo.username.length < 5 || userInfo.username.length > 32){
+        res.status(400).json({
+            status: false,
+            message: "invalid email"
+        })
+        return;
+    }
+
+    users.push({
+        usernaem: userInfo.username,
+        password: userInfo.password,
+        email: userInfo.email
+    })
+    
+    console.log(users);
+
+
+    res.status(201).json({
+        status: true
+    })
+})
+
+
+app.post("/login", function (req, res){
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const user = users.find(function(i){
+        return i.username === username
+    })
+
+    if (user === undefined){
+        res.status(404).json({
+            status: false,
+            message: "not found user"
+        })
+        return;
+    }
+
+    if (user.password !== password){
+        res.status(401).json({
+            status: false,
+            message: "incorrect password"
+        })
+        return;
+    }
+
+    res.status(200).json({
+        status: true,
+        message: "success",
+        token: user.username + ":" + user.password
+    })
+})
+
+app.get("/", function(req, res){
+    const token = req.headers.token;
+    
+    if (token === undefined) {
+        res.status(401).json({
+            message: "unauthorized"
+        })
+        return;
+    }
+
+    const userInfo = token.split(":");
+    const user = users.find(function(i){
+        return i.username === userInfo(i)
+    })
+
+    if (user === undefined){
+        res.status(401).json({
+            message: "unauthorized"
+        })
+        return;
+    }
+
+    res.json(users)
+})
+
+app.listen(3000)
