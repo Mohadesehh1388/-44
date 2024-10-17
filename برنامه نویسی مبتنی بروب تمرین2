@@ -1,0 +1,44 @@
+// Mohadeseh Borandeh
+const express = require('express');
+const app = express();
+// app port
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+app.get("/", (req, res) => {
+    const value = req.query.value;
+
+    const valuesList = [null, "", undefined, 0, "hello", 102, {}, [], !false, !"hello"];
+    
+    const resultsList = [false, false, false, false, true, true, true, true, true, true];
+
+    const index = valuesList.findIndex(item => {
+        // Handle special cases for comparison
+        if (item === null && value === 'null') return true;
+        if (item === "" && value === '') return true;
+        if (item === undefined && value === 'undefined') return true;
+        if (item === 0 && value === '0') return true;
+        if (item === 102 && value === '102') return true;
+        if (item === "hello" && value === 'hello') return true;
+        if (Array.isArray(item) && value === '[]') return true; // Check for empty array
+        if (typeof item === 'object' && item !== null && value === '[object Object]') return true; // Check for object
+        if (item === false && value === 'false') return true; // Check for !false
+        if (item === true && value === 'true') return true; // Check for !"hello"
+        return false;
+    });
+
+    // Determine the result based on the index found
+    const result = index !== -1 ? resultsList[index] : false;
+
+    // Return the result
+    res.status(200).json({ result });
+});
+
+app.listen(port, () => {
+    console.log(app is running on port http://localhost:${port});
+});
+
+
+//? http://localhost:3000/?value = ----
